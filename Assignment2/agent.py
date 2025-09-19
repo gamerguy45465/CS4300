@@ -162,7 +162,7 @@ def main():
 
     result = a_star(initial_state)
 
-    
+
 
 
 

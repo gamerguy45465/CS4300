@@ -1,0 +1,33 @@
+NAME: Sudoku Instance 1
+DESC: Sudoku Problem Instance 1
+VARS:
+  X11: [1, 2, 3, 4]
+  X12: [1, 2, 3, 4]
+  X13: [1, 2, 3, 4]
+  X14: [1, 2, 3, 4]
+  X21: [1, 2, 3, 4]
+  X22: [1, 2, 3, 4]
+  X23: [1, 2, 3, 4]
+  X24: [1, 2, 3, 4] 
+  X31: [1, 2, 3, 4] 
+  X32: [1, 2, 3, 4]
+  X33: [1, 2, 3, 4]
+  X34: [1, 2, 3, 4]
+  X41: [1, 2, 3, 4]
+  X42: [1, 2, 3, 4]
+  X43: [1, 2, 3, 4]
+  X44: [1, 2, 3, 4]
+
+
+CONS:
+  # distinct letters
+  alldiff(X11, X12, X13, X14)
+  alldiff(X21, X22, X23, X24)
+  alldiff(X31, X32, X33, X34)
+  alldiff(X41, X42, X43, X44)
+
+
+  alldiff(X11, X21, X31, X41)
+  alldiff(X12, X22, X32, X42)
+  alldiff(X13, X23, X33, X43)
+  alldiff(X14, X24, X34, X44)
