@@ -2,6 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Callable, Iterable, Optional
 import operator
+import sys
+
+#sys.setrecursionlimit(100000)
 
 Val = int
 Assignment = Dict[str, Val]
@@ -72,6 +75,7 @@ def c_add10(x: str, y: str, cin: str, z: str, cout: str) -> Constraint:
 def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterable[Assignment]:
     domains = {v: list(ds) for v, ds in csp.domains.items()}
     order = var_order or list(domains.keys())
+    csp_keys = list(domains.keys())
     cons_by_var: Dict[str, List[Constraint]] = {v: [] for v in domains}
     for c in csp.constraints:
         for v in c.scope:
@@ -86,18 +90,76 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
                 return False
         return True
 
+
+
+    def MRV(unassigned, low, high):
+        
+        if(not high > low):
+            return unassigned[low]
+
+        mid = (high + low) // 2
+
+        Left = MRV(unassigned, low, mid)
+        Right = MRV(unassigned, mid + 1, high)
+        
+        ret_val = None
+
+        if(len(domains[Left]) <= len(domains[Right])):
+            ret_val = Left
+
+        else:
+            ret_val = Right
+
+
+        return ret_val
+        
+        
+    def print_assignment():
+        #For Testing
+        new_line_needed = 0
+        s = ""
+        for d in order:
+            if(d in list(assignment.keys())):
+                s += str(assignment[d]) + " "
+                new_line_needed += 1
+
+            else:
+                s += str(0) + " "
+                new_line_needed += 1
+
+            if(new_line_needed >= 4):
+                print(s)
+                s = ""
+                new_line_needed = 0
+            
+        print(s)
+        print()
+
+
     def backtrack(idx: int):
-        if idx == len(order):
+        '''if idx == len(order):
             yield dict(assignment)
+            return'''
+        #print_assignment()
+        if(len(assignment) == len(domains)):
+            #print_assignment()
+            new_assignment = {}
+            for key in domains.keys():
+                if(key in assignment):
+                    new_assignment[key] = assignment[key]
+            yield dict(new_assignment)
             return
-        v = order[idx]
-        for val in domains[v]:
+        #v = order[idx]
+        unassigned = [v for v in domains if v not in assignment]
+        v = MRV(unassigned,0, len(unassigned) - 1)
+        for val in list(domains[v]):
             assignment[v] = val
             if consistent_with_local(v, assignment):
                 # forward check
                 pruned = []
                 ok = True
-                for w in order[idx+1:]:
+                #for w in order[idx+1:]:
+                for w in [x for x in domains if x not in assignment]:
                     removed = []
                     for vv in list(domains[w]):
                         assignment[w] = vv
@@ -113,8 +175,15 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
                 # undo pruning
                 for w, removed in pruned:
                     domains[w].extend(removed)
+
+
             del assignment[v]
 
+        if(idx == 0):
+            print("end")
+            
+
     yield from backtrack(0)
+
 
 
