@@ -71,6 +71,60 @@ def c_add10(x: str, y: str, cin: str, z: str, cout: str) -> Constraint:
         return True
     return Constraint(scope, pred, f"add10({x},{y},{cin}->{z},{cout})")
 
+def solve_backtrackingOG(csp: CSP, var_order: Optional[List[str]]=None) -> Iterable[Assignment]:
+    domains = {v: list(ds) for v, ds in csp.domains.items()}
+    order = var_order or list(domains.keys())
+    cons_by_var: Dict[str, List[Constraint]] = {v: [] for v in domains}
+    for c in csp.constraints:
+        for v in c.scope:
+            if v in cons_by_var:
+                cons_by_var[v].append(c)
+
+    assignment: Assignment = {}
+
+    def consistent_with_local(v: str, a: Assignment) -> bool:
+        for c in cons_by_var[v]:
+            if not c.pred(a):
+                return False
+        return True
+
+    def backtrack(idx: int):
+        if idx == len(order):
+            yield dict(assignment)
+            print("Steps: ", idx)
+            return
+        v = order[idx]
+        for val in domains[v]:
+            assignment[v] = val
+            if consistent_with_local(v, assignment):
+                # forward check
+                pruned = []
+                ok = True
+                for w in order[idx+1:]:
+                    removed = []
+                    for vv in list(domains[w]):
+                        assignment[w] = vv
+                        if not consistent_with_local(w, assignment):
+                            domains[w].remove(vv); removed.append(vv)
+                        del assignment[w]
+                    if removed:
+                        pruned.append((w, removed))
+                    if not domains[w]:
+                        ok = False; break
+                if ok:
+                    yield from backtrack(idx+1)
+                # undo pruning
+                for w, removed in pruned:
+                    domains[w].extend(removed)
+            del assignment[v]
+
+    yield from backtrack(0)
+
+
+
+
+
+
 # ---------- Simple solver (BT + forward checking) ----------
 def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterable[Assignment]:
     domains = {v: list(ds) for v, ds in csp.domains.items()}
@@ -148,6 +202,7 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
                 if(key in assignment):
                     new_assignment[key] = assignment[key]
             yield dict(new_assignment)
+            print("Steps: ", idx)
             return
         #v = order[idx]
         unassigned = [v for v in domains if v not in assignment]
