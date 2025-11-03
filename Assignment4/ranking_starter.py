@@ -40,7 +40,6 @@ api_key = getenv("GEMINI_API_KEY")
 if not api_key:
     raise Exception("GEMINI_API_KEY needs to be set in .env.")
 
-#oai = OpenAI(api_key="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")
 model_id="gemini-2.5-flash"
 model = OpenAIServerModel(model_id=model_id,
                           api_base="https://generativelanguage.googleapis.com/v1beta/openai/",
