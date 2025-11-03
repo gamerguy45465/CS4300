@@ -1,32 +1,53 @@
+from smolagents import Tool, DuckDuckGoSearchTool
 import pandas as pd
 import numpy as np
 
 
-def start_pandas():
-    df = pd.read_csv("events.csv")
-    dates = np.array(df["date"])
-    start_times = np.array(df["start_time"])
-    end_times = np.array(df["end_time"])
-    titles = np.array(df["title"])
-    locations = np.array(df["location"])
-    categories = np.array(df["category"])
-    descriptions = np.array(df["description"])
-    urls = np.array(df["url"])
+class UniversityEventSearchTool(Tool):
+    name = "university_event_search"
+    description = """Given a Pandas DataFrame that contains information about Utah Tech University, and given the name of an event,
+    this tool will return the results from that DataFrame. The results will be stored in a Python Dictionary of the following form:
+    
+    {url: {title: description, ...}, ...}
+    
+    """
+    inputs = {"query": {"type": "string", "description": "Event name to search for"}}
+    output_type = "string"
 
-    return dates, start_times, end_times, titles, locations, descriptions, urls, categories
+    def __init__(self):
+        super().__init__()
+        self.df = pd.read_csv("events.csv")
+
+    def forward(self, query: str) -> str:
+        urls = list(self.df["url"])
+        titles = list(self.df["title"])
+        descs = list(self.df["description"])
+        url_title = {}
+
+        for i in range(len(urls)):
+            td = {titles[i]: descs[i]}
+            url_title[urls[i]] = td
+
+
+        return str(url_title)
 
 
 
+class UniversitySearchEngineTool(Tool):
+    name = "university_search"
+    description = "Given a query, this tool will return the results from that query"
+    inputs = {"query": {"type": "string", "description": "The query to search for."}}
+    output_type = "string"
+
+    def __init__(self):
+        super().__init__()
+        self._ddgs = DuckDuckGoSearchTool()
+
+    def forward(self, query: str) -> str:
+        if not query:
+            return "Error: no query provided."
+        result = self._ddgs(query)
+        return result
 
 
 
-dates, start_times, end_times, titles, locations, descriptions, urls, categories = start_pandas()
-
-print(dates)
-print(start_times)
-print(end_times)
-print(titles)
-print(locations)
-print(descriptions)
-print(urls)
-print(categories)

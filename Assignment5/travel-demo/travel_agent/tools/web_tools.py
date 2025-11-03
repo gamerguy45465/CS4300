@@ -18,6 +18,7 @@ class CityAttractionSearchTool(Tool):
         query = f"top cultural attractions in {city}?"
         return self._ddgs(query)
 
+
 class ScrapePageTool(Tool):
     name = "scrape_page"
     description = "Fetch a web page and return a cleaned text summary (title + first ~500 characters)."
@@ -41,11 +42,4 @@ class ScrapePageTool(Tool):
         return f"{title}\n{snippet}"
 
 
-class CampusSearchTool(Tool):
-    name = "campus_search"
-    description = """
-    Given a list of events that will occur at Utah Tech in the coming month, 
-    and given a description of what to find, this tool will search that list for the specified item and return
-    its url"""
-    inputs = {}
 
